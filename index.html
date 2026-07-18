@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Aethera AI Travel Planner - Get personalized itineraries, custom budgets, packing lists, local food guides, and travel tips instantly. Powered by Gemini.">
+  <title>Aethera AI - Smart Travel Planning Assistant</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Vanilla CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Chart.js for Budget Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- html2pdf.js for direct PDF download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+  <!-- Background elements -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <!-- Header Section -->
+  <header class="app-header">
+    <div class="container header-container">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <i data-lucide="compass" class="icon-spin"></i>
+        </div>
+        <div class="logo-text">
+          <h1>Aethera AI</h1>
+          <span>Travel Assistant</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-settings" class="btn-icon-label" aria-label="Gemini API Settings">
+          <i data-lucide="settings"></i>
+          <span>AI Settings</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="container main-content">
+
+    <!-- HERO SECTION -->
+    <section id="hero-section" class="hero-banner">
+      <div class="hero-image-overlay"></div>
+      <img src="assets/hero.jpg" alt="Beautiful travel illustration banner" class="hero-img">
+      <div class="hero-content">
+        <h2>Your Next Adventure, Engineered by AI</h2>
+        <p>Enter your travel desires and receive a fully customized, day-wise itinerary, intelligent budget, and personalized packing checklist in seconds.</p>
+      </div>
+    </section>
+
+    <!-- SETUP FORM SECTION -->
+    <section id="planner-form-section" class="card form-card glassmorphic">
+      <h3 class="section-title"><i data-lucide="sparkles"></i> Customize Your Journey</h3>
+      
+      <form id="travel-form" novalidate>
+        
+        <div class="form-grid">
+          <!-- Starting Location -->
+          <div class="form-group full-width-mobile">
+            <label for="input-starting-loc"><i data-lucide="map-pin"></i> Starting Location</label>
+            <input type="text" id="input-starting-loc" placeholder="e.g. San Francisco, CA" required>
+            <span class="error-msg" id="err-starting-loc">Please enter a valid starting location.</span>
+          </div>
+
+          <!-- Travel Month -->
+          <div class="form-group">
+            <label for="select-month"><i data-lucide="calendar"></i> Travel Month</label>
+            <select id="select-month" required>
+              <option value="" disabled selected>Select a month...</option>
+              <option value="January">January</option>
+              <option value="February">February</option>
+              <option value="March">March</option>
+              <option value="April">April</option>
+              <option value="May">May</option>
+              <option value="June">June</option>
+              <option value="July">July</option>
+              <option value="August">August</option>
+              <option value="September">September</option>
+              <option value="October">October</option>
+              <option value="November">November</option>
+              <option value="December">December</option>
+            </select>
+            <span class="error-msg" id="err-month">Please select a month.</span>
+          </div>
+
+          <!-- Trip Duration -->
+          <div class="form-group">
+            <label for="input-duration"><i data-lucide="clock"></i> Duration (Days)</label>
+            <div class="counter-input">
+              <button type="button" class="btn-counter" id="btn-duration-minus" aria-label="Decrease days">-</button>
+              <input type="number" id="input-duration" value="5" min="1" max="14" readonly>
+              <button type="button" class="btn-counter" id="btn-duration-plus" aria-label="Increase days">+</button>
+            </div>
+          </div>
+
+          <!-- Number of Travelers -->
+          <div class="form-group">
+            <label for="input-travelers"><i data-lucide="users"></i> Travelers</label>
+            <div class="counter-input">
+              <button type="button" class="btn-counter" id="btn-travelers-minus" aria-label="Decrease travelers">-</button>
+              <input type="number" id="input-travelers" value="2" min="1" max="10" readonly>
+              <button type="button" class="btn-counter" id="btn-travelers-plus" aria-label="Increase travelers">+</button>
+            </div>
+            <span class="traveler-label" id="txt-traveler-label">Couple</span>
+          </div>
+
+          <!-- Budget Level -->
+          <div class="form-group">
+            <label><i data-lucide="dollar-sign"></i> Budget Category</label>
+            <div class="budget-selector">
+              <label class="budget-option">
+                <input type="radio" name="budget-level" value="budget" checked>
+                <div class="budget-card">
+                  <span class="budget-icon">🎒</span>
+                  <span class="budget-name">Budget</span>
+                  <span class="budget-desc">Backpacker style</span>
+                </div>
+              </label>
+              <label class="budget-option">
+                <input type="radio" name="budget-level" value="midrange">
+                <div class="budget-card">
+                  <span class="budget-icon">🏨</span>
+                  <span class="budget-name">Mid-Range</span>
+                  <span class="budget-desc">Comfort & value</span>
+                </div>
+              </label>
+              <label class="budget-option">
+                <input type="radio" name="budget-level" value="luxury">
+                <div class="budget-card">
+                  <span class="budget-icon">✨</span>
+                  <span class="budget-name">Luxury</span>
+                  <span class="budget-desc">Premium comforts</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Currency & Maximum Budget -->
+          <div class="form-group">
+            <label for="input-budget-amount"><i data-lucide="credit-card"></i> Max Budget Amount</label>
+            <div class="input-addon-group">
+              <select id="select-currency" class="input-addon-select">
+                <option value="USD" selected>USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="JPY">JPY (¥)</option>
+                <option value="AUD">AUD (A$)</option>
+              </select>
+              <input type="number" id="input-budget-amount" placeholder="e.g. 3000" min="100" max="100000" required>
+            </div>
+            <span class="error-msg" id="err-budget-amount">Enter amount (min 100).</span>
+          </div>
+
+          <!-- Accommodation Type -->
+          <div class="form-group">
+            <label for="select-accommodation"><i data-lucide="home"></i> Accommodation</label>
+            <select id="select-accommodation" required>
+              <option value="" disabled selected>Choose lodging...</option>
+              <option value="Hostel">Hostel / Social Stay</option>
+              <option value="Budget Hotel">Budget Hotel</option>
+              <option value="Boutique Hotel">Boutique Hotel</option>
+              <option value="Luxury Resort">Luxury Resort</option>
+              <option value="Airbnb Villa">Airbnb / Private Villa</option>
+            </select>
+            <span class="error-msg" id="err-accommodation">Please select accommodation.</span>
+          </div>
+
+          <!-- Transportation Preference -->
+          <div class="form-group">
+            <label for="select-transport"><i data-lucide="plane"></i> Transportation</label>
+            <select id="select-transport" required>
+              <option value="" disabled selected>Choose transit...</option>
+              <option value="Flights">Flights</option>
+              <option value="Trains">Trains / Rail Pass</option>
+              <option value="Car Rental">Rental Car</option>
+              <option value="Public Transport">Public Transport Only</option>
+            </select>
+            <span class="error-msg" id="err-transport">Please select transportation.</span>
+          </div>
+        </div>
+
+        <!-- Travel Interests (Tags) -->
+        <div class="form-group full-width margin-top">
+          <label><i data-lucide="heart"></i> Travel Interests (Select all that apply)</label>
+          <div class="interests-grid" id="interests-container">
+            <button type="button" class="interest-tag" data-interest="Adventure"><i data-lucide="mountain"></i> Adventure</button>
+            <button type="button" class="interest-tag" data-interest="Culture"><i data-lucide="building"></i> Culture</button>
+            <button type="button" class="interest-tag" data-interest="Food"><i data-lucide="utensils"></i> Foodie</button>
+            <button type="button" class="interest-tag" data-interest="Nature"><i data-lucide="trees"></i> Nature</button>
+            <button type="button" class="interest-tag" data-interest="Relaxation"><i data-lucide="palmtree"></i> Relaxation</button>
+            <button type="button" class="interest-tag" data-interest="Shopping"><i data-lucide="shopping-bag"></i> Shopping</button>
+            <button type="button" class="interest-tag" data-interest="Nightlife"><i data-lucide="music"></i> Nightlife</button>
+            <button type="button" class="interest-tag" data-interest="History"><i data-lucide="landmark"></i> History</button>
+          </div>
+          <span class="error-msg" id="err-interests">Please select at least one interest.</span>
+        </div>
+
+        <!-- Generate Button -->
+        <div class="form-actions">
+          <button type="submit" id="btn-submit" class="btn btn-primary btn-large">
+            <i data-lucide="sparkles" class="icon-btn"></i> Generate Travel Plan
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- LOADING STATE SECTION -->
+    <section id="loading-section" class="card loading-card glassmorphic hidden">
+      <div class="spinner-container">
+        <div class="spinner"></div>
+        <div class="spinner-ring"></div>
+        <i data-lucide="compass" class="spinner-icon text-glow"></i>
+      </div>
+      <h3 id="loading-status-text">Formulating your dream itinerary...</h3>
+      <p id="loading-subtext">Our AI model is sifting through destination metrics, weather, and budget parameters...</p>
+      
+      <!-- Progress Bar -->
+      <div class="loading-progress-bar-container">
+        <div class="loading-progress-bar" id="loading-progress"></div>
+      </div>
+    </section>
+
+    <!-- RESULTS DASHBOARD SECTION -->
+    <section id="results-dashboard" class="dashboard-section hidden">
+      
+      <!-- Quick Action Buttons -->
+      <div class="dashboard-header-actions">
+        <button id="btn-edit-plan" class="btn btn-secondary"><i data-lucide="arrow-left"></i> Change Preferences</button>
+        <div class="btn-group">
+          <button id="btn-print" class="btn btn-secondary"><i data-lucide="printer"></i> Print</button>
+          <button id="btn-download" class="btn btn-primary"><i data-lucide="download"></i> Export PDF</button>
+        </div>
+      </div>
+
+      <!-- Destination Summary Card -->
+      <div class="card destination-hero-card glassmorphic">
+        <div class="destination-hero-header">
+          <div class="dest-meta">
+            <span class="dest-badge"><i data-lucide="star"></i> AI Recommended Destination</span>
+            <h2 id="dest-title">Tokyo, Japan</h2>
+            <div class="dest-quick-stats">
+              <span id="dest-duration"><i data-lucide="calendar"></i> 5 Days</span>
+              <span id="dest-month"><i data-lucide="sun"></i> October</span>
+              <span id="dest-travelers"><i data-lucide="users"></i> 2 Travelers</span>
+              <span id="dest-match"><i data-lucide="thumbs-up"></i> 96% Match</span>
+            </div>
+          </div>
+          <div class="dest-weather-card">
+            <div class="weather-temp">
+              <i data-lucide="cloud-sun" id="dest-weather-icon"></i>
+              <span id="dest-temp">18°C</span>
+            </div>
+            <div class="weather-label" id="dest-weather-desc">Pleasant & Sunny</div>
+          </div>
+        </div>
+        <p id="dest-description" class="dest-desc">A mesmerizing blend of neon-lit skyscrapers, ancient shrines, and incredible culinary delights. Perfectly fits your budget and desires for culture and food.</p>
+      </div>
+
+      <!-- TAB NAVIGATION -->
+      <nav class="dashboard-tabs">
+        <button class="tab-btn active" data-tab="tab-itinerary"><i data-lucide="milestone"></i> Day Itinerary</button>
+        <button class="tab-btn" data-tab="tab-budget"><i data-lucide="pie-chart"></i> Budget Planner</button>
+        <button class="tab-btn" data-tab="tab-packing"><i data-lucide="luggage"></i> Packing Checklist</button>
+        <button class="tab-btn" data-tab="tab-tips"><i data-lucide="lightbulb"></i> Local Guide</button>
+      </nav>
+
+      <!-- TAB CONTENTS -->
+      <div class="tab-content-container">
+        
+        <!-- ITINERARY TAB -->
+        <div id="tab-itinerary" class="tab-pane active">
+          <div class="itinerary-header">
+            <h3><i data-lucide="navigation"></i> Complete Timeline</h3>
+            <button id="btn-toggle-all-days" class="btn btn-text">Expand All Days</button>
+          </div>
+          <div class="itinerary-timeline" id="itinerary-timeline-container">
+            <!-- Dynamically populated day accordions go here -->
+          </div>
+        </div>
+
+        <!-- BUDGET TAB -->
+        <div id="tab-budget" class="tab-pane">
+          <div class="budget-layout">
+            <div class="card budget-chart-card glass-panel">
+              <h4>Estimated Spending Distribution</h4>
+              <div class="chart-wrapper">
+                <canvas id="budget-doughnut-chart"></canvas>
+              </div>
+            </div>
+            <div class="budget-details">
+              <div class="card total-budget-card glass-panel">
+                <span class="label">Total Estimated Cost</span>
+                <div class="budget-price-group">
+                  <span class="value" id="val-total-budget">$2,450</span>
+                  <span class="max-label" id="val-max-budget">of $3,000 max budget</span>
+                </div>
+                <div class="budget-bar-wrapper">
+                  <div class="budget-bar-fill" id="val-budget-percent-fill" style="width: 81.6%;"></div>
+                </div>
+              </div>
+              <div class="budget-breakdown-list" id="budget-items-container">
+                <!-- Dynamically populated budget items go here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PACKING CHECKLIST TAB -->
+        <div id="tab-packing" class="tab-pane">
+          <div class="packing-layout">
+            <!-- Left Panel: Summary & Custom Add -->
+            <div class="packing-sidebar">
+              <div class="card packing-progress-card glass-panel">
+                <h4>Checklist Completion</h4>
+                <div class="progress-radial-container">
+                  <svg class="progress-radial" viewBox="0 0 100 100">
+                    <circle class="progress-radial-bg" cx="50" cy="50" r="40" stroke-width="8" fill="none"></circle>
+                    <circle id="packing-radial-bar" class="progress-radial-fill" cx="50" cy="50" r="40" stroke-width="8" fill="none" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+                  </svg>
+                  <div class="radial-label">
+                    <span id="packing-percent">0%</span>
+                    <span id="packing-fraction">0/0 Items</span>
+                  </div>
+                </div>
+                <p class="checklist-hint">Items checked here will stay saved in your browser.</p>
+              </div>
+
+              <!-- Add custom packing item form -->
+              <div class="card add-packing-card glass-panel">
+                <h4>Add Custom Item</h4>
+                <form id="add-packing-item-form">
+                  <div class="form-group-compact">
+                    <input type="text" id="input-packing-name" placeholder="Item name..." required>
+                    <select id="select-packing-category" required>
+                      <option value="Clothing">Clothing</option>
+                      <option value="Toiletries">Toiletries</option>
+                      <option value="Electronics">Electronics</option>
+                      <option value="Documents">Documents</option>
+                      <option value="Essential">Essentials</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-compact" aria-label="Add item">
+                      <i data-lucide="plus"></i> Add
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Right Panel: Checklist Categories -->
+            <div class="packing-lists-grid" id="packing-lists-container">
+              <!-- Dynamically populated packing items categorized go here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- TIPS & GUIDE TAB -->
+        <div id="tab-tips" class="tab-pane">
+          
+          <!-- Local Food Section -->
+          <div class="guide-section">
+            <h3><i data-lucide="utensils" class="color-accent"></i> Local Gastronomy — Must-Try Culinary Specialties</h3>
+            <div class="food-grid" id="food-container">
+              <!-- Dynamically populated local food items go here -->
+            </div>
+          </div>
+
+          <div class="guide-divider"></div>
+
+          <!-- Attractions & General Tips Layout -->
+          <div class="guide-two-col">
+            <!-- Must Visit Attractions -->
+            <div class="guide-column">
+              <h3><i data-lucide="map" class="color-primary"></i> Highlight Attractions</h3>
+              <div class="attractions-list" id="attractions-container">
+                <!-- Dynamically populated attractions list goes here -->
+              </div>
+            </div>
+
+            <!-- Essential Travel Tips -->
+            <div class="guide-column">
+              <h3><i data-lucide="shield-check" class="color-success"></i> Essential Local Guidance</h3>
+              <div class="tips-list" id="tips-container">
+                <!-- Dynamically populated travel tips list goes here -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Footer action details (For PDF capture, hidden in screen UI) -->
+      <div id="pdf-footer-branding" class="pdf-only">
+        <p>Itinerary compiled dynamically by <strong>Aethera AI Travel Assistant</strong>.</p>
+        <p>Aethera AI &copy; 2026. All rights reserved.</p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Floating Settings Gear Modal (API Configuration) -->
+  <div id="modal-settings" class="modal-backdrop hidden">
+    <div class="modal card glassmorphic">
+      <div class="modal-header">
+        <h3><i data-lucide="settings"></i> AI Configuration</h3>
+        <button id="btn-close-settings" class="btn-close" aria-label="Close settings modal"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">By default, Aethera uses an intelligent, local, rule-based simulator to generate your itineraries. To enable live, unrestricted, global itineraries, connect your Gemini API Key.</p>
+        
+        <div class="form-group margin-bottom">
+          <label for="input-api-key"><i data-lucide="key"></i> Gemini API Key</label>
+          <input type="password" id="input-api-key" placeholder="Enter AIzaSy... key">
+          <span class="help-text">Your API key is stored securely in your local browser storage and is sent directly to Google's Gemini servers.</span>
+        </div>
+
+        <div class="api-status-indicator" id="api-status-area">
+          <span class="status-dot status-simulated"></span>
+          <span id="api-status-text">Simulated AI Mode (Active)</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-clear-key" class="btn btn-danger">Clear Key</button>
+        <button id="btn-save-key" class="btn btn-primary">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Banner -->
+  <div id="toast-notification" class="toast hidden">
+    <span id="toast-message">Key saved successfully!</span>
+  </div>
+
+  <!-- Main JavaScript File -->
+  <script src="app.js"></script>
+</body>
+</html>
